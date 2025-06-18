@@ -1,26 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resume Builder | TECHZAM</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Techzam Resume Builder</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>TECHZAM Resume Builder 💼</h1>
-    <form id="resumeForm">
-      <input type="text" placeholder="Full Name" id="name" required />
-      <input type="text" placeholder="Education" id="education" required />
-      <input type="text" placeholder="Skills (comma separated)" id="skills" required />
-      <input type="text" placeholder="Projects" id="projects" required />
-      <button type="submit">Generate Resume</button>
-    </form>
-    <div id="output"></div>
-    <button id="downloadBtn" style="display:none;">Download PDF</button>
-    <button onclick="downloadPDF()">Download as PDF</button>
-  </div>
+    <h1>Techzam Resume Builder</h1><form id="resume-form">
+  <h2>Personal Info</h2>
+  <input type="text" id="name" placeholder="Full Name" required>
+  <input type="text" id="email" placeholder="Email" required>
 
-  <script src="script.js"></script>
-</body>
+  <h2>Education</h2>
+  <textarea id="education" placeholder="Your education details..." required></textarea>
+
+  <h2>Experience</h2>
+  <textarea id="experience" placeholder="Your work experience..." required></textarea>
+
+  <button type="button" onclick="generateResume()">Generate Resume</button>
+  <button type="button" onclick="downloadPDF()">Download PDF</button>
+  <button type="button" onclick="saveToCloud()">Save to Cloud</button>
+  <button type="button" onclick="loadFromCloud()">Load from Cloud</button>
+</form>
+
+<div id="resume-preview" class="resume">
+  <!-- Resume will be injected here -->
+</div>
+
+  </div>  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function generateResume() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const education = document.getElementById("education").value;
+      const experience = document.getElementById("experience").value;
+
+      const preview = document.getElementById("resume-preview");
+      preview.innerHTML = `
+        <h2>${name}</h2>
+        <p><strong>Email:</strong> ${email}</p>
+        <h3>Education</h3>
+        <p>${education}</p>
+        <h3>Experience</h3>
+        <p>${experience}</p>
+      `;
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById("resume-preview");
+      const opt = {
+        margin:       0.5,
+        filename:     'my_resume.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+    }
+
+    function saveToCloud() {
+      const data = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        education: document.getElementById("education").value,
+        experience: document.getElementById("experience").value
+      };
+      db.collection("resumes").doc(data.email).set(data)
+        .then(() => alert("Saved to cloud!"))
+        .catch(error => console.error("Error saving:", error));
+    }
+
+    function loadFromCloud() {
+      const email = document.getElementById("email").value;
+      db.collection("resumes").doc(email).get()
+        .then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            document.getElementById("name").value = data.name;
+            document.getElementById("education").value = data.education;
+            document.getElementById("experience").value = data.experience;
+            generateResume();
+          } else {
+            alert("No resume found for this email.");
+          }
+        })
+        .catch(error => console.error("Error loading:", error));
+    }
+  </script></body>
   </html>
