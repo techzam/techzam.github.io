@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Builder | TECHZAM</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>TECHZAM Resume Builder 💼</h1>
+    <form id="resumeForm">
+      <input type="text" placeholder="Full Name" id="name" required />
+      <input type="text" placeholder="Education" id="education" required />
+      <input type="text" placeholder="Skills (comma separated)" id="skills" required />
+      <input type="text" placeholder="Projects" id="projects" required />
+      <button type="submit">Generate Resume</button>
+    </form>
+    <div id="output"></div>
+    <button onclick="downloadPDF()">Download as PDF</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+  </html>
